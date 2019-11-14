@@ -61,6 +61,7 @@
     "lint-staged": "^10.1.0",
     "lit-html-benchmarks": "^0.2.1",
     "mocha": "^7.0.1",
+    "prettier": "^2.0.5",
     "rollup": "^1.19.0",
     "rollup-plugin-filesize": "^6.2.0",
     "rollup-plugin-terser": "^5.2.0",

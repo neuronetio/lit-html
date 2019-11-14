@@ -16,9 +16,14 @@
  * @module lit-html
  */
 
-import {reparentNodes} from './dom.js';
-import {TemplateProcessor} from './template-processor.js';
-import {boundAttributeSuffix, lastAttributeNameRegex, marker, nodeMarker} from './template.js';
+import { reparentNodes } from './dom.js';
+import { TemplateProcessor } from './template-processor.js';
+import {
+  boundAttributeSuffix,
+  lastAttributeNameRegex,
+  marker,
+  nodeMarker,
+} from './template.js';
 
 declare const trustedTypes: typeof window.trustedTypes;
 /**
@@ -29,10 +34,16 @@ declare const trustedTypes: typeof window.trustedTypes;
  * before any untrusted expressions have been mixed in. Therefor it is
  * considered safe by construction.
  */
-const policy = window.trustedTypes &&
-    trustedTypes!.createPolicy('lit-html', {createHTML: (s) => s});
+const policy =
+  window.trustedTypes &&
+  trustedTypes!.createPolicy('lit-html', { createHTML: (s) => s });
 
 const commentMarker = ` ${marker} `;
+
+/**
+ * Used to clone existing node instead of each time creating new one which is slower
+ */
+const emptyTemplateNode = document.createElement('template');
 
 /**
  * The return type of `html`, which holds a Template and the values from
@@ -45,8 +56,11 @@ export class TemplateResult {
   readonly processor: TemplateProcessor;
 
   constructor(
-      strings: TemplateStringsArray, values: readonly unknown[], type: string,
-      processor: TemplateProcessor) {
+    strings: TemplateStringsArray,
+    values: readonly unknown[],
+    type: string,
+    processor: TemplateProcessor
+  ) {
     this.strings = strings;
     this.values = values;
     this.type = type;
@@ -84,8 +98,9 @@ export class TemplateResult {
       // We're in comment position if we have a comment open with no following
       // comment close. Because <-- can appear in an attribute value there can
       // be false positives.
-      isCommentBinding = (commentOpen > -1 || isCommentBinding) &&
-          s.indexOf('-->', commentOpen + 1) === -1;
+      isCommentBinding =
+        (commentOpen > -1 || isCommentBinding) &&
+        s.indexOf('-->', commentOpen + 1) === -1;
       // Check to see if we have an attribute-like sequence preceding the
       // expression. This can match "name=value" like structures in text,
       // comments, and attribute values, so there can be false-positives.
@@ -101,9 +116,13 @@ export class TemplateResult {
         // For attributes we use just a marker sentinel, and also append a
         // $lit$ suffix to the name to opt-out of attribute-specific parsing
         // that IE and Edge do for style and certain SVG attributes.
-        html += s.substr(0, attributeMatch.index) + attributeMatch[1] +
-            attributeMatch[2] + boundAttributeSuffix + attributeMatch[3] +
-            marker;
+        html +=
+          s.substr(0, attributeMatch.index) +
+          attributeMatch[1] +
+          attributeMatch[2] +
+          boundAttributeSuffix +
+          attributeMatch[3] +
+          marker;
       }
     }
     html += this.strings[l];
@@ -111,14 +130,14 @@ export class TemplateResult {
   }
 
   getTemplateElement(): HTMLTemplateElement {
-    const template = document.createElement('template');
+    const template = emptyTemplateNode.cloneNode() as HTMLTemplateElement;
     let value = this.getHTML();
     if (policy !== undefined) {
       // this is secure because `this.strings` is a TemplateStringsArray.
       // TODO: validate this when
       // https://github.com/tc39/proposal-array-is-template-object is
       // implemented.
-      value = policy.createHTML(value) as unknown as string;
+      value = (policy.createHTML(value) as unknown) as string;
     }
     template.innerHTML = value;
     return template;

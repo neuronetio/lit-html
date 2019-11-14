@@ -44,3 +44,4 @@ pids
 /docs/api/
 /docs/node_modules/
 *.pyc
+.history/

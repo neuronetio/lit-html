@@ -12,26 +12,112 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {isDirective} from './directive.js';
-import {removeNodes} from './dom.js';
-import {noChange, nothing, Part} from './part.js';
-import {RenderOptions} from './render-options.js';
-import {TemplateInstance} from './template-instance.js';
-import {TemplateResult} from './template-result.js';
-import {createMarker} from './template.js';
+import { isDirective } from './directive.js';
+import { removeNodes } from './dom.js';
+import { noChange, nothing, Part } from './part.js';
+import { RenderOptions } from './render-options.js';
+import { TemplateInstance } from './template-instance.js';
+import { TemplateResult } from './template-result.js';
+import { createMarker } from './template.js';
 
 // https://tc39.github.io/ecma262/#sec-typeof-operator
-export type Primitive = null|undefined|boolean|number|string|symbol|bigint;
+export type Primitive =
+  | null
+  | undefined
+  | boolean
+  | number
+  | string
+  | symbol
+  | bigint;
 export const isPrimitive = (value: unknown): value is Primitive => {
   return (
-      value === null ||
-      !(typeof value === 'object' || typeof value === 'function'));
+    value === null ||
+    !(typeof value === 'object' || typeof value === 'function')
+  );
 };
 export const isIterable = (value: unknown): value is Iterable<unknown> => {
-  return Array.isArray(value) ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      !!(value && (value as any)[Symbol.iterator]);
+  return (
+    Array.isArray(value) ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    !!(value && (value as any)[Symbol.iterator])
+  );
 };
+
+/**
+ * Used to sanitize any value before it is written into the DOM. This can be
+ * used to implement a security policy of allowed and disallowed values in
+ * order to prevent XSS attacks.
+ *
+ * One way of using this callback would be to check attributes and properties
+ * against a list of high risk fields, and require that values written to such
+ * fields be instances of a class which is safe by construction. Closure's Safe
+ * HTML Types is one implementation of this technique (
+ * https://github.com/google/safe-html-types/blob/master/doc/safehtml-types.md).
+ * The TrustedTypes polyfill in API-only mode could also be used as a basis
+ * for this technique (https://github.com/WICG/trusted-types).
+ *
+ * @param node The HTML node (usually either a #text node or an Element) that
+ *   is being written to. Note that this is just an exemplar node, the write
+ *   may take place against another instance of the same class of node.
+ * @param name The name of an attribute or property (for example, 'href').
+ * @param type Indicates whether the write that's about to be performed will
+ *   be to a property or a node.
+ * @returns A function that will sanitize this class of writes.
+ */
+export type SanitizerFactory = (
+  node: Node,
+  name: string,
+  type: 'property' | 'attribute'
+) => ValueSanitizer;
+
+/**
+ * A function which can sanitize values that will be written to a specific kind
+ * of DOM sink.
+ *
+ * See SanitizerFactory.
+ *
+ * @param value The value to sanitize. Will be the actual value passed into
+ *   the lit-html template literal, so this could be of any type.
+ * @returns The value to write to the DOM. Usually the same as the input value,
+ *   unless sanitization is needed.
+ */
+export type ValueSanitizer = (value: unknown) => unknown;
+
+const identityFunction: ValueSanitizer = (value: unknown) => value;
+const noopSanitizer: SanitizerFactory = (
+  _node: Node,
+  _name: string,
+  _type: 'property' | 'attribute'
+) => identityFunction;
+
+/**
+ * A global callback used to get a sanitizer for a given field.
+ */
+export let sanitizerFactory: SanitizerFactory = noopSanitizer;
+
+/** Sets the global sanitizer factory. */
+export const setSanitizerFactory = (newSanitizer: SanitizerFactory) => {
+  if (sanitizerFactory !== noopSanitizer) {
+    throw new Error(
+      `Attempted to overwrite existing lit-html security policy.` +
+        ` setSanitizeDOMValueFactory should be called at most once.`
+    );
+  }
+  sanitizerFactory = newSanitizer;
+};
+
+/**
+ * Only used in internal tests, not a part of the public API.
+ * The name and implementation may change at any time.
+ */
+export const __testOnlyClearSanitizerFactoryDoNotCallOrElse = () => {
+  sanitizerFactory = noopSanitizer;
+};
+
+/**
+ * Used to clone text node instead of each time creating new one which is slower
+ */
+const emptyTextNode = document.createTextNode('');
 
 /**
  * Writes attribute values to the DOM for a group of AttributeParts bound to a
@@ -201,8 +287,8 @@ export class NodePart implements Part {
    * This part must be empty, as its contents are not automatically moved.
    */
   appendIntoPart(part: NodePart) {
-    part.__insert(this.startNode = createMarker());
-    part.__insert(this.endNode = createMarker());
+    part.__insert((this.startNode = createMarker()));
+    part.__insert((this.endNode = createMarker()));
   }
 
   /**
@@ -211,7 +297,7 @@ export class NodePart implements Part {
    * This part must be empty, as its contents are not automatically moved.
    */
   insertAfterPart(ref: NodePart) {
-    ref.__insert(this.startNode = createMarker());
+    ref.__insert((this.startNode = createMarker()));
     this.endNode = ref.endNode;
     ref.endNode = this.startNode;
   }
@@ -271,31 +357,40 @@ export class NodePart implements Part {
     // If `value` isn't already a string, we explicitly convert it here in case
     // it can't be implicitly converted - i.e. it's a symbol.
     const valueAsString: string =
-        typeof value === 'string' ? value : String(value);
-    if (node === this.endNode.previousSibling &&
-        node.nodeType === 3 /* Node.TEXT_NODE */) {
+      typeof value === 'string' ? value : String(value);
+    if (
+      node === this.endNode.previousSibling &&
+      node.nodeType === 3 /* Node.TEXT_NODE */
+    ) {
       // If we only have a single text node between the markers, we can just
       // set its value, rather than replacing it.
       // TODO(justinfagnani): Can we just check if this.value is primitive?
       (node as Text).data = valueAsString;
     } else {
-      this.__commitNode(document.createTextNode(valueAsString));
+      const textNode = emptyTextNode.cloneNode() as Text;
+      textNode.textContent = valueAsString;
+      this.__commitNode(textNode);
     }
     this.value = value;
   }
 
   private __commitTemplateResult(value: TemplateResult): void {
     const template = this.options.templateFactory(value);
-    if (this.value instanceof TemplateInstance &&
-        this.value.template === template) {
+    if (
+      this.value instanceof TemplateInstance &&
+      this.value.template === template
+    ) {
       this.value.update(value.values);
     } else {
       // Make sure we propagate the template processor from the TemplateResult
       // so that we use its syntax extension, etc. The template factory comes
       // from the render function options so that it can control template
       // caching and preprocessing.
-      const instance =
-          new TemplateInstance(template, value.processor, this.options);
+      const instance = new TemplateInstance(
+        template,
+        value.processor,
+        this.options
+      );
       const fragment = instance._clone();
       instance.update(value.values);
       this.__commitNode(fragment);
@@ -323,7 +418,7 @@ export class NodePart implements Part {
     // items from a previous render
     const itemParts = this.value as NodePart[];
     let partIndex = 0;
-    let itemPart: NodePart|undefined;
+    let itemPart: NodePart | undefined;
 
     for (const item of value) {
       // Try to reuse an existing part
@@ -353,7 +448,10 @@ export class NodePart implements Part {
 
   clear(startNode: Node = this.startNode) {
     removeNodes(
-        this.startNode.parentNode!, startNode.nextSibling!, this.endNode);
+      this.startNode.parentNode!,
+      startNode.nextSibling!,
+      this.endNode
+    );
   }
 }
 
@@ -374,7 +472,8 @@ export class BooleanAttributePart implements Part {
   constructor(element: Element, name: string, strings: readonly string[]) {
     if (strings.length !== 2 || strings[0] !== '' || strings[1] !== '') {
       throw new Error(
-          'Boolean attributes can only contain a single expression');
+        'Boolean attributes can only contain a single expression'
+      );
     }
     this.element = element;
     this.name = name;
@@ -422,7 +521,7 @@ export class PropertyCommitter extends AttributeCommitter {
   constructor(element: Element, name: string, strings: ReadonlyArray<string>) {
     super(element, name, strings);
     this.single =
-        (strings.length === 2 && strings[0] === '' && strings[1] === '');
+      strings.length === 2 && strings[0] === '' && strings[1] === '';
   }
 
   protected _createPart(): PropertyPart {
@@ -461,7 +560,7 @@ let eventOptionsSupported = false;
       get capture() {
         eventOptionsSupported = true;
         return false;
-      }
+      },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.addEventListener('test', options as any, options);
@@ -472,15 +571,15 @@ let eventOptionsSupported = false;
   }
 })();
 
-type EventHandlerWithOptions =
-    EventListenerOrEventListenerObject&Partial<AddEventListenerOptions>;
+type EventHandlerWithOptions = EventListenerOrEventListenerObject &
+  Partial<AddEventListenerOptions>;
 export class EventPart implements Part {
   readonly element: Element;
   readonly eventName: string;
   readonly eventContext?: EventTarget;
-  value: undefined|EventHandlerWithOptions = undefined;
+  value: undefined | EventHandlerWithOptions = undefined;
   private __options?: AddEventListenerOptions;
-  private __pendingValue: undefined|EventHandlerWithOptions = undefined;
+  private __pendingValue: undefined | EventHandlerWithOptions = undefined;
   private readonly __boundHandleEvent: (event: Event) => void;
 
   constructor(element: Element, eventName: string, eventContext?: EventTarget) {
@@ -490,7 +589,7 @@ export class EventPart implements Part {
     this.__boundHandleEvent = (e) => this.handleEvent(e);
   }
 
-  setValue(value: undefined|EventHandlerWithOptions): void {
+  setValue(value: undefined | EventHandlerWithOptions): void {
     this.__pendingValue = value;
   }
 
@@ -506,22 +605,29 @@ export class EventPart implements Part {
 
     const newListener = this.__pendingValue;
     const oldListener = this.value;
-    const shouldRemoveListener = newListener == null ||
-        oldListener != null &&
-            (newListener.capture !== oldListener.capture ||
-             newListener.once !== oldListener.once ||
-             newListener.passive !== oldListener.passive);
+    const shouldRemoveListener =
+      newListener == null ||
+      (oldListener != null &&
+        (newListener.capture !== oldListener.capture ||
+          newListener.once !== oldListener.once ||
+          newListener.passive !== oldListener.passive));
     const shouldAddListener =
-        newListener != null && (oldListener == null || shouldRemoveListener);
+      newListener != null && (oldListener == null || shouldRemoveListener);
 
     if (shouldRemoveListener) {
       this.element.removeEventListener(
-          this.eventName, this.__boundHandleEvent, this.__options);
+        this.eventName,
+        this.__boundHandleEvent,
+        this.__options
+      );
     }
     if (shouldAddListener) {
       this.__options = getOptions(newListener);
       this.element.addEventListener(
-          this.eventName, this.__boundHandleEvent, this.__options);
+        this.eventName,
+        this.__boundHandleEvent,
+        this.__options
+      );
     }
     this.value = newListener;
     this.__pendingValue = noChange as EventHandlerWithOptions;
@@ -539,7 +645,8 @@ export class EventPart implements Part {
 // We copy options because of the inconsistent behavior of browsers when reading
 // the third argument of add/removeEventListener. IE11 doesn't support options
 // at all. Chrome 41 only reads `capture` if the argument is an object.
-const getOptions = (o: AddEventListenerOptions|undefined) => o &&
-    (eventOptionsSupported ?
-         {capture: o.capture, passive: o.passive, once: o.once} :
-         o.capture as AddEventListenerOptions);
+const getOptions = (o: AddEventListenerOptions | undefined) =>
+  o &&
+  (eventOptionsSupported
+    ? { capture: o.capture, passive: o.passive, once: o.once }
+    : (o.capture as AddEventListenerOptions));
