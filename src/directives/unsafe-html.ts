@@ -12,8 +12,8 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {isPrimitive} from '../lib/parts.js';
-import {directive, NodePart, Part} from '../lit-html.js';
+import { isPrimitive } from '../lib/parts.js';
+import { directive, NodePart, Part } from '../lit-html.js';
 
 interface PreviousValue {
   readonly value: unknown;
@@ -47,14 +47,18 @@ export const unsafeHTML = directive((value: unknown) => (part: Part): void => {
 
   const previousValue = previousValues.get(part);
 
-  if (previousValue !== undefined && isPrimitive(value) &&
-      value === previousValue.value && part.value === previousValue.fragment) {
+  if (
+    previousValue !== undefined &&
+    isPrimitive(value) &&
+    value === previousValue.value &&
+    part.value === previousValue.fragment
+  ) {
     return;
   }
 
   const template = emptyTemplateNode.cloneNode() as HTMLTemplateElement;
-  template.innerHTML = value as string;  // innerHTML casts to string internally
+  template.innerHTML = value as string; // innerHTML casts to string internally
   const fragment = document.importNode(template.content, true);
   part.setValue(fragment);
-  previousValues.set(part, {value, fragment});
+  previousValues.set(part, { value, fragment });
 });
