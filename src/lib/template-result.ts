@@ -41,7 +41,8 @@ const policy =
 const commentMarker = ` ${marker} `;
 
 /**
- * Used to clone existing node instead of each time creating new one which is slower
+ * Used to clone existing node instead of each time creating new one which is
+ * slower
  */
 const emptyTemplateNode = document.createElement('template');
 
