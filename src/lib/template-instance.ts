@@ -45,13 +45,9 @@ export class TemplateInstance {
     for (const part of this.__parts) {
       if (part !== undefined) {
         part.setValue(values[i]);
-      }
-      i++;
-    }
-    for (const part of this.__parts) {
-      if (part !== undefined) {
         part.commit();
       }
+      i++;
     }
   }
 
