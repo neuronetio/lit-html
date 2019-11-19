@@ -78,9 +78,6 @@ export class Directive {
   isDirective: boolean = true;
   isClass: boolean = true;
 
-  constructor() {
-  }
-
   // @ts-ignore
   body(part: Part) {
   }
