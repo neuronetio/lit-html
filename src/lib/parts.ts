@@ -221,7 +221,13 @@ export class AttributePart implements Part {
     while (isDirective(this.value)) {
       const directive = this.value;
       this.value = noChange;
-      directive(this);
+      // @ts-ignore
+      if (directive.isClass) {
+        // @ts-ignore
+        directive.runPart(this);
+      } else {
+        directive(this);
+      }
     }
     if (this.value === noChange) {
       return;
@@ -300,7 +306,13 @@ export class NodePart implements Part {
     while (isDirective(this.__pendingValue)) {
       const directive = this.__pendingValue;
       this.__pendingValue = noChange;
-      directive(this);
+      // @ts-ignore
+      if (directive.isClass) {
+        // @ts-ignore
+        directive.runPart(this);
+      } else {
+        directive(this);
+      }
     }
     const value = this.__pendingValue;
     if (value === noChange) {
@@ -486,7 +498,13 @@ export class BooleanAttributePart implements Part {
     while (isDirective(this.__pendingValue)) {
       const directive = this.__pendingValue;
       this.__pendingValue = noChange;
-      directive(this);
+      // @ts-ignore
+      if (directive.isClass) {
+        // @ts-ignore
+        directive.runPart(this);
+      } else {
+        directive(this);
+      }
     }
     if (this.__pendingValue === noChange) {
       return;
@@ -593,7 +611,13 @@ export class EventPart implements Part {
     while (isDirective(this.__pendingValue)) {
       const directive = this.__pendingValue;
       this.__pendingValue = noChange as EventHandlerWithOptions;
-      directive(this);
+      // @ts-ignore
+      if (directive.isClass) {
+        // @ts-ignore
+        directive.runPart(this);
+      } else {
+        directive(this);
+      }
     }
     if (this.__pendingValue === noChange) {
       return;
