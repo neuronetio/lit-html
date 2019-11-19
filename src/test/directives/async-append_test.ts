@@ -61,7 +61,10 @@ suite('asyncAppend', () => {
 
   test('uses a mapper function', async () => {
     render(
-        html`<div>${asyncAppend(iterable, (v, i) => html`${i}: ${v} `)}</div>`,
+        html`<div>${
+            asyncAppend(
+                iterable,
+                (v: unknown, i: unknown) => html`${i}: ${v} `)}</div>`,
         container);
     assert.equal(stripExpressionMarkers(container.innerHTML), '<div></div>');
 

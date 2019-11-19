@@ -60,7 +60,10 @@ suite('asyncReplace', () => {
 
   test('uses the mapper function', async () => {
     render(
-        html`<div>${asyncReplace(iterable, (v, i) => html`${i}: ${v} `)}</div>`,
+        html`<div>${
+            asyncReplace(
+                iterable,
+                (v: unknown, i: unknown) => html`${i}: ${v} `)}</div>`,
         container);
     assert.equal(stripExpressionMarkers(container.innerHTML), '<div></div>');
 
