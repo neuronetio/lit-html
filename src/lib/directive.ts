@@ -70,7 +70,6 @@ export const directive = <F extends DirectiveFactory>(f: F): F =>
 export type DirectiveBody = (part: Part, ...args: unknown[]) => void;
 
 export class Directive {
-  part: Part|undefined;
   isDirective: boolean = true;
   isClass: boolean = true;
 
