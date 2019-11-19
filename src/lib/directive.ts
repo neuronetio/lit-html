@@ -71,7 +71,27 @@ export const directive = <F extends DirectiveFactory>(f: F): F =>
       return d;
     }) as F;
 
+export type DirectiveBody = (part: Part, ...args: unknown[]) => void;
+
+export class Directive {
+  part: Part|undefined;
+  isDirective: boolean = true;
+  isClass: boolean = true;
+
+  constructor() {
+  }
+
+  // @ts-ignore
+  body(part: Part) {
+  }
+
+  runPart(part: Part) {
+    return this.body(part);
+  }
+}
+
 export const isDirective = (o: unknown): o is DirectiveFn => {
-  // tslint:disable-next-line:no-any
-  return o !== undefined && o !== null && typeof (o as any).isDirective === 'boolean';
+  return o !== undefined && o !== null &&
+      // tslint:disable-next-line:no-any
+      typeof (o as any).isDirective === 'boolean';
 };
