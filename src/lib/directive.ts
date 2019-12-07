@@ -61,20 +61,20 @@ export type DirectiveFn = (part: Part) => void;
  */
 export const directive = <F extends DirectiveFactory>(f: F): F =>
     ((...args: unknown[]) => {
-      const d = f(...args);
-      // @ts-ignore
-      d.isDirective = true;
+    const d = f(...args);
+      // tslint:disable-next-line:no-any
+      (d as any).isDirective = true;
       return d;
     }) as F;
 
 export type DirectiveBody = (part: Part, ...args: unknown[]) => void;
 
 export class Directive {
-  isDirective: boolean = true;
-  isClass: boolean = true;
+  isDirective = true;
+  isClass = true;
 
-  // @ts-ignore
-  body(part: Part) {
+  body(_part: Part) {
+    // body of the directive
   }
 
   runPart(part: Part) {

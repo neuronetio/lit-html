@@ -231,10 +231,10 @@ export class AttributePart implements Part {
     while (isDirective(this.value)) {
       const directive = this.value;
       this.value = noChange;
-      // @ts-ignore
-      if (directive.isClass) {
-        // @ts-ignore
-        directive.runPart(this);
+      // tslint:disable-next-line: no-any
+      if ((directive as any).isClass) {
+        // tslint:disable-next-line: no-any
+        (directive as any).runPart(this);
       } else {
         directive(this);
       }
@@ -319,10 +319,10 @@ export class NodePart implements Part {
     while (isDirective(this.__pendingValue)) {
       const directive = this.__pendingValue;
       this.__pendingValue = noChange;
-      // @ts-ignore
-      if (directive.isClass) {
-        // @ts-ignore
-        directive.runPart(this);
+      // tslint:disable-next-line: no-any
+      if ((directive as any).isClass) {
+        // tslint:disable-next-line: no-any
+        (directive as any).runPart(this);
       } else {
         directive(this);
       }
@@ -500,10 +500,10 @@ export class BooleanAttributePart implements Part {
     while (isDirective(this.__pendingValue)) {
       const directive = this.__pendingValue;
       this.__pendingValue = noChange;
-      // @ts-ignore
-      if (directive.isClass) {
-        // @ts-ignore
-        directive.runPart(this);
+      // tslint:disable-next-line: no-any
+      if ((directive as any).isClass) {
+        // tslint:disable-next-line: no-any
+        (directive as any).runPart(this);
       } else {
         directive(this);
       }
@@ -615,10 +615,10 @@ export class EventPart implements Part {
     while (isDirective(this.__pendingValue)) {
       const directive = this.__pendingValue;
       this.__pendingValue = noChange as EventHandlerWithOptions;
-      // @ts-ignore
-      if (directive.isClass) {
-        // @ts-ignore
-        directive.runPart(this);
+      // tslint:disable-next-line: no-any
+      if ((directive as any).isClass) {
+        // tslint:disable-next-line: no-any
+        (directive as any).runPart(this);
       } else {
         directive(this);
       }
