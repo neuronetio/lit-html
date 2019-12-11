@@ -234,7 +234,7 @@ export class AttributePart implements Part {
       // tslint:disable-next-line: no-any
       if ((directive as any).isClass) {
         // tslint:disable-next-line: no-any
-        (directive as any).runPart(this);
+        (directive as any).body(this);
       } else {
         directive(this);
       }
@@ -322,7 +322,7 @@ export class NodePart implements Part {
       // tslint:disable-next-line: no-any
       if ((directive as any).isClass) {
         // tslint:disable-next-line: no-any
-        (directive as any).runPart(this);
+        (directive as any).body(this);
       } else {
         directive(this);
       }
@@ -503,7 +503,7 @@ export class BooleanAttributePart implements Part {
       // tslint:disable-next-line: no-any
       if ((directive as any).isClass) {
         // tslint:disable-next-line: no-any
-        (directive as any).runPart(this);
+        (directive as any).body(this);
       } else {
         directive(this);
       }
@@ -618,7 +618,7 @@ export class EventPart implements Part {
       // tslint:disable-next-line: no-any
       if ((directive as any).isClass) {
         // tslint:disable-next-line: no-any
-        (directive as any).runPart(this);
+        (directive as any).body(this);
       } else {
         directive(this);
       }

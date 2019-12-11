@@ -70,15 +70,11 @@ export const directive = <F extends DirectiveFactory>(f: F): F =>
 export type DirectiveBody = (part: Part, ...args: unknown[]) => void;
 
 export class Directive {
-  isDirective = true;
-  isClass = true;
+  public isDirective = true;
+  public isClass = true;
 
-  body(_part: Part) {
+  public body(_part: Part) {
     // body of the directive
-  }
-
-  runPart(part: Part) {
-    return this.body(part);
   }
 }
 
