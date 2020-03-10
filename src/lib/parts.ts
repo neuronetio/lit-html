@@ -584,6 +584,7 @@ let eventOptionsSupported = false;
     window.addEventListener('test', options as any, options);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.removeEventListener('test', options as any, options);
+    // eslint-disable-next-line
   } catch (_e) {
     // event options not supported
   }
