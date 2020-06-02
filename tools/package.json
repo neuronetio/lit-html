@@ -12,7 +12,7 @@
     "@types/koa-static": "^4.0.0",
     "@types/marked": "^0.3.0",
     "@types/prismjs": "^1.9.0",
-    "front-matter": "^2.3.0",
+    "front-matter": "^4.0.1",
     "fs-extra": "^5.0.0",
     "glob": "^7.1.2",
     "koa": "^2.4.1",
