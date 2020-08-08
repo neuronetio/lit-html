@@ -12,35 +12,26 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import { isDirective } from './directive.js';
-import { removeNodes } from './dom.js';
-import { noChange, nothing, Part } from './part.js';
-import { RenderOptions } from './render-options.js';
-import { TemplateInstance } from './template-instance.js';
-import { TemplateResult } from './template-result.js';
-import { createMarker } from './template.js';
+import {isDirective} from './directive.js';
+import {removeNodes} from './dom.js';
+import {noChange, nothing, Part} from './part.js';
+import {RenderOptions} from './render-options.js';
+import {TemplateInstance} from './template-instance.js';
+import {TemplateResult} from './template-result.js';
+import {createMarker} from './template.js';
 
 // https://tc39.github.io/ecma262/#sec-typeof-operator
-export type Primitive =
-  | null
-  | undefined
-  | boolean
-  | number
-  | string
-  | symbol
-  | bigint;
+export type Primitive =|null|undefined|boolean|number|string|symbol|bigint;
 export const isPrimitive = (value: unknown): value is Primitive => {
   return (
-    value === null ||
-    !(typeof value === 'object' || typeof value === 'function')
-  );
+      value === null ||
+      !(typeof value === 'object' || typeof value === 'function'));
 };
 export const isIterable = (value: unknown): value is Iterable<unknown> => {
   return (
-    Array.isArray(value) ||
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !!(value && (value as any)[Symbol.iterator])
-  );
+      Array.isArray(value) ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      !!(value && (value as any)[Symbol.iterator]));
 };
 
 /**
@@ -298,10 +289,10 @@ export class NodePart implements Part {
     // If `value` isn't already a string, we explicitly convert it here in case
     // it can't be implicitly converted - i.e. it's a symbol.
     const valueAsString: string =
-      typeof value === 'string' ? value : String(value);
+        typeof value === 'string' ? value : String(value);
     if (
-      node === this.endNode.previousSibling &&
-      node.nodeType === 3 /* Node.TEXT_NODE */
+        node === this.endNode.previousSibling &&
+        node.nodeType === 3 /* Node.TEXT_NODE */
     ) {
       // If we only have a single text node between the markers, we can just
       // set its value, rather than replacing it.
@@ -317,21 +308,16 @@ export class NodePart implements Part {
 
   private __commitTemplateResult(value: TemplateResult): void {
     const template = this.options.templateFactory(value);
-    if (
-      this.value instanceof TemplateInstance &&
-      this.value.template === template
-    ) {
+    if (this.value instanceof TemplateInstance &&
+        this.value.template === template) {
       this.value.update(value.values);
     } else {
       // Make sure we propagate the template processor from the TemplateResult
       // so that we use its syntax extension, etc. The template factory comes
       // from the render function options so that it can control template
       // caching and preprocessing.
-      const instance = new TemplateInstance(
-        template,
-        value.processor,
-        this.options
-      );
+      const instance =
+          new TemplateInstance(template, value.processor, this.options);
       const fragment = instance._clone();
       instance.update(value.values);
       this.__commitNode(fragment);
@@ -359,7 +345,7 @@ export class NodePart implements Part {
     // items from a previous render
     const itemParts = this.value as NodePart[];
     let partIndex = 0;
-    let itemPart: NodePart | undefined;
+    let itemPart: NodePart|undefined;
 
     for (const item of value) {
       // Try to reuse an existing part
@@ -389,10 +375,7 @@ export class NodePart implements Part {
 
   clear(startNode: Node = this.startNode) {
     removeNodes(
-      this.startNode.parentNode!,
-      startNode.nextSibling!,
-      this.endNode
-    );
+        this.startNode.parentNode!, startNode.nextSibling!, this.endNode);
   }
 }
 
@@ -413,8 +396,7 @@ export class BooleanAttributePart implements Part {
   constructor(element: Element, name: string, strings: readonly string[]) {
     if (strings.length !== 2 || strings[0] !== '' || strings[1] !== '') {
       throw new Error(
-        'Boolean attributes can only contain a single expression'
-      );
+          'Boolean attributes can only contain a single expression');
     }
     this.element = element;
     this.name = name;
@@ -468,7 +450,7 @@ export class PropertyCommitter extends AttributeCommitter {
   constructor(element: Element, name: string, strings: ReadonlyArray<string>) {
     super(element, name, strings);
     this.single =
-      strings.length === 2 && strings[0] === '' && strings[1] === '';
+        strings.length === 2 && strings[0] === '' && strings[1] === '';
   }
 
   protected _createPart(): PropertyPart {
@@ -519,15 +501,15 @@ let eventOptionsSupported = false;
   }
 })();
 
-type EventHandlerWithOptions = EventListenerOrEventListenerObject &
-  Partial<AddEventListenerOptions>;
+type EventHandlerWithOptions =
+    EventListenerOrEventListenerObject&Partial<AddEventListenerOptions>;
 export class EventPart implements Part {
   readonly element: Element;
   readonly eventName: string;
   readonly eventContext?: EventTarget;
-  value: undefined | EventHandlerWithOptions = undefined;
+  value: undefined|EventHandlerWithOptions = undefined;
   private __options?: AddEventListenerOptions;
-  private __pendingValue: undefined | EventHandlerWithOptions = undefined;
+  private __pendingValue: undefined|EventHandlerWithOptions = undefined;
   private readonly __boundHandleEvent: (event: Event) => void;
 
   constructor(element: Element, eventName: string, eventContext?: EventTarget) {
@@ -537,7 +519,7 @@ export class EventPart implements Part {
     this.__boundHandleEvent = (e) => this.handleEvent(e);
   }
 
-  setValue(value: undefined | EventHandlerWithOptions): void {
+  setValue(value: undefined|EventHandlerWithOptions): void {
     this.__pendingValue = value;
   }
 
@@ -559,29 +541,22 @@ export class EventPart implements Part {
 
     const newListener = this.__pendingValue;
     const oldListener = this.value;
-    const shouldRemoveListener =
-      newListener == null ||
-      (oldListener != null &&
-        (newListener.capture !== oldListener.capture ||
+    const shouldRemoveListener = newListener == null ||
+        (oldListener != null &&
+         (newListener.capture !== oldListener.capture ||
           newListener.once !== oldListener.once ||
           newListener.passive !== oldListener.passive));
     const shouldAddListener =
-      newListener != null && (oldListener == null || shouldRemoveListener);
+        newListener != null && (oldListener == null || shouldRemoveListener);
 
     if (shouldRemoveListener) {
       this.element.removeEventListener(
-        this.eventName,
-        this.__boundHandleEvent,
-        this.__options
-      );
+          this.eventName, this.__boundHandleEvent, this.__options);
     }
     if (shouldAddListener) {
       this.__options = getOptions(newListener);
       this.element.addEventListener(
-        this.eventName,
-        this.__boundHandleEvent,
-        this.__options
-      );
+          this.eventName, this.__boundHandleEvent, this.__options);
     }
     this.value = newListener;
     this.__pendingValue = noChange as EventHandlerWithOptions;
@@ -599,8 +574,7 @@ export class EventPart implements Part {
 // We copy options because of the inconsistent behavior of browsers when reading
 // the third argument of add/removeEventListener. IE11 doesn't support options
 // at all. Chrome 41 only reads `capture` if the argument is an object.
-const getOptions = (o: AddEventListenerOptions | undefined) =>
-  o &&
-  (eventOptionsSupported
-    ? { capture: o.capture, passive: o.passive, once: o.once }
-    : (o.capture as AddEventListenerOptions));
+const getOptions = (o: AddEventListenerOptions|undefined) => o &&
+    (eventOptionsSupported ?
+         {capture: o.capture, passive: o.passive, once: o.once} :
+         (o.capture as AddEventListenerOptions));

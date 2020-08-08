@@ -29,45 +29,22 @@
  * Do not remove this comment; it keeps typedoc from misplacing the module
  * docs.
  */
-import { defaultTemplateProcessor } from './lib/default-template-processor.js';
-import { SVGTemplateResult, TemplateResult } from './lib/template-result.js';
+import {defaultTemplateProcessor} from './lib/default-template-processor.js';
+import {SVGTemplateResult, TemplateResult} from './lib/template-result.js';
 
-export {
-  DefaultTemplateProcessor,
-  defaultTemplateProcessor,
-} from './lib/default-template-processor.js';
-export {
-  directive,
-  Directive,
-  DirectiveBody,
-  DirectiveFn,
-  isDirective,
-} from './lib/directive.js';
+export {DefaultTemplateProcessor, defaultTemplateProcessor,} from './lib/default-template-processor.js';
+export {directive, Directive, DirectiveBody, DirectiveFn, isDirective,} from './lib/directive.js';
 // TODO(justinfagnani): remove line when we get NodePart moving methods
-export { removeNodes, reparentNodes } from './lib/dom.js';
-export { noChange, nothing, Part } from './lib/part.js';
-export {
-  AttributeCommitter,
-  AttributePart,
-  BooleanAttributePart,
-  EventPart,
-  isIterable,
-  isPrimitive,
-  NodePart,
-  PropertyCommitter,
-  PropertyPart,
-} from './lib/parts.js';
-export { RenderOptions } from './lib/render-options.js';
-export { parts, render } from './lib/render.js';
-export { templateCaches, templateFactory } from './lib/template-factory.js';
-export { TemplateInstance } from './lib/template-instance.js';
-export { TemplateProcessor } from './lib/template-processor.js';
-export { SVGTemplateResult, TemplateResult } from './lib/template-result.js';
-export {
-  createMarker,
-  isTemplatePartActive,
-  Template,
-} from './lib/template.js';
+export {removeNodes, reparentNodes} from './lib/dom.js';
+export {noChange, nothing, Part} from './lib/part.js';
+export {AttributeCommitter, AttributePart, BooleanAttributePart, EventPart, isIterable, isPrimitive, NodePart, PropertyCommitter, PropertyPart,} from './lib/parts.js';
+export {RenderOptions} from './lib/render-options.js';
+export {parts, render} from './lib/render.js';
+export {templateCaches, templateFactory} from './lib/template-factory.js';
+export {TemplateInstance} from './lib/template-instance.js';
+export {TemplateProcessor} from './lib/template-processor.js';
+export {SVGTemplateResult, TemplateResult} from './lib/template-result.js';
+export {createMarker, isTemplatePartActive, Template,} from './lib/template.js';
 
 declare global {
   interface Window {
@@ -79,7 +56,8 @@ declare global {
 // This line will be used in regexes to search for lit-html usage.
 // TODO(justinfagnani): inject version number at build time
 if (typeof window !== 'undefined') {
-  (window['litHtmlVersions'] || (window['litHtmlVersions'] = [])).push('1.2.1');
+  (window['litHtmlVersions'] || (window['litHtmlVersions'] = []))
+      .push('1.3.0-pre.1');
 }
 
 /**
@@ -87,11 +65,11 @@ if (typeof window !== 'undefined') {
  * render to and update a container.
  */
 export const html = (strings: TemplateStringsArray, ...values: unknown[]) =>
-  new TemplateResult(strings, values, 'html', defaultTemplateProcessor);
+    new TemplateResult(strings, values, 'html', defaultTemplateProcessor);
 
 /**
  * Interprets a template literal as an SVG template that can efficiently
  * render to and update a container.
  */
 export const svg = (strings: TemplateStringsArray, ...values: unknown[]) =>
-  new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
+    new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);

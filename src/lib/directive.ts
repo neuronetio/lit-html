@@ -12,7 +12,7 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import { Part } from './part.js';
+import {Part} from './part.js';
 
 // tslint:disable-next-line:no-any
 export type DirectiveFactory = (...args: any[]) => object;
@@ -60,12 +60,12 @@ export type DirectiveFn = (part: Part) => void;
  * });
  */
 export const directive = <F extends DirectiveFactory>(f: F): F =>
-  ((...args: unknown[]) => {
-    const d = f(...args);
-    // tslint:disable-next-line:no-any
-    (d as any).isDirective = true;
-    return d;
-  }) as F;
+    ((...args: unknown[]) => {
+      const d = f(...args);
+      // tslint:disable-next-line:no-any
+      (d as any).isDirective = true;
+      return d;
+    }) as F;
 
 export type DirectiveBody = (part: Part, ...args: unknown[]) => void;
 
@@ -80,9 +80,7 @@ export class Directive {
 
 export const isDirective = (o: unknown): o is DirectiveFn => {
   return (
-    o !== undefined &&
-    o !== null &&
-    // tslint:disable-next-line:no-any
-    typeof (o as any).isDirective === 'boolean'
-  );
+      o !== undefined && o !== null &&
+      // tslint:disable-next-line:no-any
+      typeof (o as any).isDirective === 'boolean');
 };
